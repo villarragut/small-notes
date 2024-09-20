@@ -4,6 +4,8 @@ This is a _very_ simple package that intends to replace org-roam in very specifi
 
 It is in the line of Protesilaos Stavrou's package [denote](https://github.com/protesilaos/denote) in spirit. I wouldn't have written this package if I'd known he was working on something probably better. Still this package suits my usage perfectly and I think it might as well serve others.
 
+![screenshot1](https://github.com/user-attachments/assets/45c6c714-d44c-45c6-be9f-4718f683c384)
+
 ## Installation
 
 Download `org-zk.el` and save it in a directory where Emacs finds it. Then, add something like this to your dot emacs file:
