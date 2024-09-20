@@ -1,0 +1,4 @@
+#+OPTIONS: toc:nil date:nil author:nil
+#+HTML_MATHJAX: path:"https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"
+#+ATTR_ORG: :width 600
+#+ATTR_HTML: :width 600
