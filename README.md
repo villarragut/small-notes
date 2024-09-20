@@ -1,6 +1,6 @@
 # org-zk: Org Zettelkasten
 
-This is a /very/ simple package that intends to replace org-roam in very specific use cases.
+This is a _very_ simple package that intends to replace org-roam in very specific use cases.
 
 It is in the line of Protesilaos Stavrou's package [denote](https://github.com/protesilaos/denote) in spirit. I wouldn't have written this package if I'd known he was working on something probably better. Still this package suits my usage perfectly and I think it might as well serve others.
 
