@@ -15,7 +15,7 @@ Download `org-zk.el` and save it in a directory where Emacs finds it. Then, add 
 
 ## Usage
 
-- Download the `setup.org` file and place it in your notes folder (by default, `~/notes`).
+- Download the `setup.org` file and place it in your notes folder (by default, `~/notes`). This file sets up some decent defaults when exporting to PDF.
 - Call `org-capture` and press the capture char for notes (by default, `n`). Press `C-c C-c` when done.
 - When visiting a note, press the transient menu binding (by default, `C-c n`) in order to:
     - Rename the note.
