@@ -5,6 +5,9 @@ This is a _very_ simple package that makes it easy to write small notes and link
 It is in the line of Protesilaos Stavrou's package [Denote](https://github.com/protesilaos/denote) in spirit, but a whole lot simpler. I wouldn't have written this package if I'd known he was working on Denote. Still this package suits my usage perfectly and I think it might as well serve others.
 
 ![screenshot1](https://github.com/user-attachments/assets/45c6c714-d44c-45c6-be9f-4718f683c384)
+<p align="center">
+    <img src="https://github.com/user-attachments/assets/5a42015e-0ebf-4a9b-bd8e-1a6a013db806"/>
+</p>
 
 ## Some features
 
