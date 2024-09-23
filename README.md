@@ -53,7 +53,7 @@ You can choose what character is used by org-capture, what key binding is added 
 (use-package small-notes
   :after org-capture
   :custom
-  (small-notes-notes-folder "~/Documents/notes")
+  (small-notes-folder "~/Documents/notes")
   (small-notes-capture-char "n"
   (small-notes-transient-binding "C-c n")))
 ```
