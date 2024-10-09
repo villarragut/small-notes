@@ -31,9 +31,19 @@
 
 ;;; Code:
 
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Custom variables ;;
+;;;;;;;;;;;;;;;;;;;;;;
+
 (defcustom small-notes-folder "~/notes" "Default folder for notes.")
 (defcustom small-notes-capture-char "n" "Char pressed to create a new note with org-capture.")
 (defcustom small-notes-transient-binding "C-c n" "Key binding (kbd notation) added to org-mode-map to show the transient menu.")
+
+
+;;;;;;;;;;;
+;; Links ;;
+;;;;;;;;;;;
 
 (defun small-notes--write-note-link (destination)
   "Write a link to the note in the current buffer in the destination and conversely."
@@ -57,14 +67,13 @@
       (search-forward "+TITLE: ")
       (set-mark-command nil)
       (move-end-of-line nil)
-      (let ((destination-title (buffer-substring (region-beginning) (region-end))))
-	;; write link in origin
-	(switch-to-buffer origin-buffer)
-	(delete-trailing-whitespace)
-	(end-of-buffer)
-	(insert
-	 (concat "  - [[file:" destination "][" destination-title "]]"))
-	(save-buffer)))))
+      (setq small-notes--destination-title (buffer-substring (region-beginning) (region-end)))
+      (save-buffer)
+      (switch-to-buffer origin-buffer)))
+  ;; write link in origin
+  (insert
+   (concat "[[file:" destination "][" small-notes--destination-title "]]"))
+  (save-buffer))
 
 (defun small-notes--link-note ()
   "Link this note to another note and conversely."
@@ -90,6 +99,11 @@
 	 ;;delete link in current note
 	 (kill-whole-line))
 	(t (message "This is not a link!"))))
+
+
+;;;;;;;;;;;;;;;;;;
+;; File actions ;;
+;;;;;;;;;;;;;;;;;;
 
 (defun small-notes--note-title-to-file-name ()
   "Set the note title, save it in small-notes--last-note-title, and return the corresponding file name."
@@ -159,6 +173,11 @@
       (delete-file file-name)
       (kill-buffer (current-buffer)))))
 
+
+;;;;;;;;;;;;
+;; Images ;;
+;;;;;;;;;;;;
+
 (defun small-notes--delete-image ()
   "Delete an image."
   (interactive)
@@ -177,6 +196,127 @@
   (let ((initial-folder "~/"))
     (org-download-image (read-file-name "Pick an image: " initial-folder))))
 
+
+;;;;;;;;;;;;;;;;;;;;;;
+;; Backlink context ;;
+;;;;;;;;;;;;;;;;;;;;;;
+
+(defvar small-notes--context-overlays nil
+  "List of overlays created by small-notes--add-paragraph-overlay-to-link.")
+
+(defun small-notes--add-paragraph-overlay-to-link (link-element search-text)
+  "Add an overlay showing a paragraph from the file in LINK-ELEMENT using SEARCH-TEXT."
+  (when (and link-element (file-exists-p (org-element-property :path link-element)))
+    ;; Open the linked file in a temporary buffer
+    (with-temp-buffer
+      (insert-file-contents (org-element-property :path link-element))
+      (goto-char (point-min))
+      (if (search-forward search-text nil t)
+          (let* ((start (progn (beginning-of-line) (point)))
+                 (end (progn (end-of-line) (point))))
+            ;; Extract the paragraph content from the temp buffer
+            (setq small-notes--context (buffer-substring-no-properties start end)))
+        (message "Text not found in the file.")))
+    ;; Now go back to the original buffer and add the overlay at the correct position
+    (when small-notes--context
+      (save-excursion
+        ;; Move to the end of the link element in the original buffer
+        (goto-char (org-element-property :end link-element))
+        ;; Insert the overlay right after the link
+        (let ((overlay (make-overlay (point) (point))))
+          (overlay-put overlay 'after-string
+                       (concat
+                        "\n"
+                        (mapconcat
+                         'identity
+                         (let ((text-chunks (split-string small-notes--context "\\(\\[\\[.*?\\]\\[\\|\\]\\]\\)"))
+                               (counter 0)
+                               (output '()))
+                           ;; Loop through chunks and format them
+                           (dolist (chunk text-chunks)
+                             (if (eq (cl-rem counter 2) 0)
+                                 (setq output (append output `(,chunk))) ;; Regular text
+                               (setq output (append output
+                                                    `(,(propertize chunk 'face '(:foreground "red")))))) ;; Red text for links
+                             (setq counter (1+ counter)))
+                           output)
+                         "")
+                        "\n"))
+          ;; Add the overlay to the list of overlays
+          (setq small-notes--context-overlays (cons overlay small-notes--context-overlays))
+          (message "Overlay added with paragraph content right after the link."))))))
+
+(defun small-notes--show-backlink-paragraphs ()
+  "Add paragraph overlays to all links under the 'Backlinks' heading."
+  (interactive)
+  (save-excursion
+    ;; Find the 'Backlinks' heading
+    (goto-char (point-min))
+    (if (re-search-forward "^\\*+ Backlinks" nil t)
+        (let ((heading-pos (point)))  ;; Save the position of the Backlinks heading
+          (org-narrow-to-subtree)      ;; Narrow to the Backlinks section
+          ;; Find and process all links within the narrowed region
+          (org-element-map (org-element-parse-buffer) 'link
+            (lambda (link)
+              (let* ((search-text (concat "file:" (file-name-nondirectory (buffer-file-name)))))
+                (small-notes--add-paragraph-overlay-to-link link search-text))))
+          (widen))  ;; Widen back to the full buffer
+      (message "No 'Backlinks' heading found."))))
+
+(defun small-notes--hide-all-paragraph-overlays ()
+  "Remove all overlays stored in small-notes--context-overlays."
+  (interactive)
+  (mapc 'delete-overlay small-notes--context-overlays)
+  (setq small-notes--context-overlays nil)
+  (message "All backlink overlays removed."))
+
+(defvar small-notes--backlink-context-shown nil
+  "Whether backlink context is shown.")
+
+(defun small-notes--toggle-backlink-context ()
+  "Toggle backlink context."
+  (interactive)
+  (make-local-variable 'small-notes--backlink-context-shown)
+  (cond (small-notes--backlink-context-shown
+	 (small-notes--hide-all-paragraph-overlays)
+	 (setq small-notes--backlink-context-shown nil))
+	(t
+	 (small-notes--show-backlink-paragraphs)
+	 (setq small-notes--backlink-context-shown t))))
+
+
+;;;;;;;;;;;
+;; LaTeX ;;
+;;;;;;;;;;;
+
+(defvar small-notes--LaTeX-symbols-shown nil
+  "Whether LaTeX symbols are shown.")
+
+(defun small-notes--toggle-LaTeX-symbols ()
+  "Toggle LaTeX symbols."
+  (interactive)
+  (make-local-variable 'small-notes--LaTeX-symbols-shown)
+  (cond (small-notes--LaTeX-symbols-shown
+	 (xenops-reveal)
+	 (setq small-notes--LaTeX-symbols-shown nil))
+	(t
+	 (xenops-render)
+	 (setq small-notes--LaTeX-symbols-shown t))))
+
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Org-capture template ;;
+;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(add-to-list
+ 'org-capture-templates
+ `(,small-notes-capture-char
+   "Note"
+   plain
+   (file (lambda() (small-notes--note-title-to-file-name))) ; sets the variable small-notes--last-note-title
+   "#+SETUPFILE: setup.org\n#+TITLE: %((lambda() small-notes--last-note-title))\n\n  %i%?\n\n* References\n\n* Backlinks\n"))
+
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Transient interface ;;
 ;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -192,19 +332,19 @@
    ["Links"
     ("l" "Link" small-notes--link-note)
     ("u" "Unlink" small-notes--unlink-note)
+    ("c" "Toggle backlink context" small-notes--toggle-backlink-context)
     ]
    ["Images"
-    ("c" "Capture" org-download-screenshot)
+    ("s" "Screenshot" org-download-screenshot)
     ("i" "Insert" small-notes--org-download-image-with-file-picker)
     ("di" "Delete" small-notes--delete-image)
     ]
    ["View"
-    ("tl" "Toggle links" org-toggle-link-display)
-    ("ti" "Toggle images" org-toggle-inline-images) 
+    ("k" "Toggle links" org-toggle-link-display)
+    ("m" "Toggle images" org-toggle-inline-images) 
     ]
    ["LaTeX"
-    ("s" "Show symbols" xenops-render)
-    ("f" "Show font" xenops-reveal)
+    ("x" "Toggle symbols" small-notes--toggle-LaTeX-symbols)
     ]])
 
 (defun small-notes-transient-if-in-notes-folder ()
@@ -219,13 +359,5 @@
 ;; binding for transient menu
 (define-key org-mode-map (kbd small-notes-transient-binding) 'small-notes-transient-if-in-notes-folder)
 
-;; org-capture template
-(add-to-list
- 'org-capture-templates
- `(,small-notes-capture-char
-   "Note"
-   plain
-   (file (lambda() (small-notes--note-title-to-file-name))) ; sets the variable small-notes--last-note-title
-   "#+SETUPFILE: setup.org\n#+TITLE: %((lambda() small-notes--last-note-title))\n\n  %i%?\n\n* Links\n"))
 
 (provide 'small-notes)
