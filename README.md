@@ -4,6 +4,8 @@ This is a _very_ simple package that makes it easy to write small notes and link
 
 It is in the line of Protesilaos Stavrou's package [Denote](https://github.com/protesilaos/denote) in spirit, but a whole lot simpler. I wouldn't have written this package if I'd known he was working on Denote. Still this package suits my usage perfectly and I think it might as well serve others.
 
+The following screenshots are _not_ updated.
+
 ![screenshot1](https://github.com/user-attachments/assets/45c6c714-d44c-45c6-be9f-4718f683c384)
 <p align="center">
     <img src="https://github.com/user-attachments/assets/5a42015e-0ebf-4a9b-bd8e-1a6a013db806"/>
@@ -17,10 +19,13 @@ It is in the line of Protesilaos Stavrou's package [Denote](https://github.com/p
     - create notes with a fixed structure and a file name according to a fixed pattern (it uses org-capture under the hood);
     - rename the notes (together with all the links to them in other notes and inline image file names);
     - delete the notes (together with all the links to them in other notes and inline image files);
-    - link notes to one another (creating symmetrical links in both linked notes);
+    - create a link in one note to another note (together with a backlink in the latter);
+    - show the context of backlinks (see [this](https://zettelkasten.de/posts/backlinks-are-bad-links/) for further information as to why it matters);
     - delete links among notes;
     - and carry out a few other minor tasks.
 - A transient menu like the one in Magit with the helper functions is included.
+
+
 
 ## Installation
 
