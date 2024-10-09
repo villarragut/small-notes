@@ -43,15 +43,15 @@ Download `small-notes.el` and save it in a directory where Emacs finds it. Then,
 - When visiting a note, press the transient menu binding (by default, `C-c n`) in order to:
     - Rename the note.
     - Delete the note.
-    - Link this note to another note (the links are created symetrically).
-    - Unlink this note from another note.
+    - Link this note to another note (together with a backlink in the latter).
+    - Remove a link from this note to another note (the corresponding backlink is removed automatically).
+    - Show the context of all backlinks in this note.
     - Take a screenshot and insert it.
     - Insert an image from a file.
     - Delete an image.
     - Toggle the visualization of Org links.
     - Toggle the visualization of image.
-    - Show LaTeX symbols (requires xenops).
-    - Show LaTeX font.
+    - Toggle the visualization of LaTeX symbols and font (requires xenops).
 
 ## Customization
 
