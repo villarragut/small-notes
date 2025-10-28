@@ -409,7 +409,7 @@ Preserves the original date prefix from the old file name."
    "Note"
    plain
    (file (lambda() (small-notes--note-title-to-file-name))) ; sets the variable small-notes--last-note-title
-   "#+SETUPFILE: setup.org\n#+TITLE: %((lambda() small-notes--last-note-title))\n\n  %i%?\n\n* References\n\n* Backlinks\n"))
+   "#+SETUPFILE: setup.org\n#+TITLE: %((lambda() small-notes--last-note-title))\n\n  %i%?\n\n* Backlinks\n"))
 
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
